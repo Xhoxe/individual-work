@@ -5,13 +5,14 @@ themes - теми:
 
 id (INT)
 title (VARCHAR) - назва
+number_in_cours - порядок теми в в курсі
 
 theoretical_materials - зберігає теоретичний матеріал
 Поля:
 
 id (INT) - ідентифікатор матеріалу
 themes_id (INT)
-number_in_course (INT) - порядок матеріалу в курсі
+theme_id (INT) - тема
 title (VARCHAR) - назва матеріалу
 content (VARCHAR) - шлях до pdf/docx матеріалу
 

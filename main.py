@@ -50,24 +50,19 @@ async def check_if_user_exists(message: types.Message):
     conn.close()
 
 
-#лове інлайн кнопки
-@dp.callback_query_handler(lambda query: True)
+#лове інлайн для прикріпленя групи до студента
+@dp.callback_query_handler(lambda query: query.data.startswith("set_group_to_new_user_"))
 async def check_and_process_callback_query(callback_query: types.CallbackQuery):
-    if (callback_query.data == "practical_matirials_manage"): #керування практичними завданнями (N3) 
-        await process_pr_query(callback_query)
-    
-    #продовжувати через elif
-    else:
-        conn = sqlite3.connect('FP.db')
-        user_id = callback_query.from_user.id
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM users WHERE id=?", (user_id,))
-        existing_user = cur.fetchone()
+    conn = sqlite3.connect('FP.db')
+    user_id = callback_query.from_user.id
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE id=?", (user_id,))
+    existing_user = cur.fetchone()
 
-        if existing_user is not None:
-            await process_callback_query(callback_query)
+    if existing_user is not None:
+        await process_callback_query(callback_query)
         
-        conn.close()
+    conn.close()
 
 
 #отримує введене ім'я та прівзищє (також у випадку якщо користувача немає в БД)
@@ -80,7 +75,7 @@ async def process_name(message: types.Message):
     keyboard = types.InlineKeyboardMarkup()
     
     for group in groups:
-        keyboard.add(types.InlineKeyboardButton(text=group[1], callback_data=group[0]))
+        keyboard.add(types.InlineKeyboardButton(text=group[1], callback_data=f"set_group_to_new_user_{group[0]}"))
         
     name_user = message.text
     query = "INSERT INTO users (id, username, role, `group`) VALUES (?, ?, ?, ?)"
@@ -91,11 +86,11 @@ async def process_name(message: types.Message):
     conn.close()
 
 
-#встановлює групу (у випадку якщо користувача немає в БД)
+#встановлює групу студенту
 async def process_callback_query(callback_query: types.CallbackQuery):
     conn = sqlite3.connect('FP.db')
     user_id = callback_query.from_user.id
-    group = callback_query.data
+    group = callback_query.data.split("set_group_to_new_user_")[1]
     query = "UPDATE users SET `group`=? WHERE id=?"
     cur = conn.cursor()
     cur.execute(query, (group, user_id))
@@ -106,6 +101,7 @@ async def process_callback_query(callback_query: types.CallbackQuery):
     
     
 #блок індивідуальне завдання N3 (Кротко)
+
 async def process_pr_query(callback_query: types.CallbackQuery):
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton(text="Завантажити нову ПР", callback_data="practical_matirials_add"))
