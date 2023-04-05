@@ -3,77 +3,85 @@
 
 themes - теми:
 
-id (INT)
-title (VARCHAR) - назва
-number_in_cours - порядок теми в в курсі
+    id (INT)
+    title (VARCHAR) - назва
+    number_in_cours - порядок теми в в курсі
 
 theoretical_materials - зберігає теоретичний матеріал
 Поля:
 
-id (INT) - ідентифікатор матеріалу
-themes_id (INT)
-theme_id (INT) - тема
-title (VARCHAR) - назва матеріалу
-content (VARCHAR) - шлях до pdf/docx матеріалу
+    id (INT) - ідентифікатор матеріалу
+    themes_id (INT)
+    theme_id (INT) - тема
+    title (VARCHAR) - назва матеріалу
+    content (VARCHAR) - шлях до pdf/docx матеріалу
 
 test_tasks - зберігає тестові завдання
 Поля:
 
-id (INT) - ідентифікатор завдання
-themes_id (INT)
-question (TEXT) - питання завдання
-option1 (VARCHAR) - варіант 1
-option2 (VARCHAR) - варіант 2
-option3 (VARCHAR) - варіант 3
-option4 (VARCHAR) - варіант 4
-correct_answer (INT) - правильна відповідь
-points (DECIMAL) - к-ть балів
+    id (INT) - ідентифікатор завдання
+    themes_id (INT)
+    question (TEXT) - питання завдання
+    option1 (VARCHAR) - варіант 1
+    option2 (VARCHAR) - варіант 2
+    option3 (VARCHAR) - варіант 3
+    option4 (VARCHAR) - варіант 4
+    correct_answer (INT) - правильна відповідь
+    points (DECIMAL) - к-ть балів
 
 practical_tasks - зберігає практичні завдання
 Поля:
 
-id (INT) - ідентифікатор завдання
-themes_id (INT)
-title (VARCHAR) - назва завдання
-content (VARCHAR) - шлях до pdf/docx матеріалу
+    id (INT) - ідентифікатор завдання
+    themes_id (INT)
+    title (VARCHAR) - назва завдання
+    content (VARCHAR) - шлях до pdf/docx матеріалу
 
 users - зберігає дані про користувачів
 Поля:
 
-id (INT) - ідентифікатор користувача
-username (VARCHAR) - ім'я користувача (ім'я або ПІБ, що вказуєця при реєстрації)
-role (INT) - роль користувача (студент/викладач (1/2))
+    id (INT) - ідентифікатор користувача
+    username (VARCHAR) - ім'я користувача (ім'я або ПІБ, що вказуєця при реєстрації)
+    role (INT) - роль користувача (студент/викладач (1/2))
 
 completed_tasks - зберігає дані про виконані тестових завдань користувачами
 Поля:
 
-id (INT) - ідентифікатор завдання
-themes_id (INT)
-user_id (INT) - ідентифікатор користувача
-task_points (DECIMAL) - к-ть балів
-completion_date (DATETIME) - дата завершення завдання
+    id (INT) - ідентифікатор завдання
+    themes_id (INT)
+    user_id (INT) - ідентифікатор користувача
+    task_points (DECIMAL) - к-ть балів
+    completion_date (DATETIME) - дата завершення завдання
 
 additional_materials - зберігає додатковий матеріал
 Поля:
 
-id (INT) - ідентифікатор матеріалу
-themes_id (INT) - можу бути пустим (не прив'язаним до будь-якої теми)
-title (VARCHAR) - назва матеріалу
-content (VARCHAR) - шлях до pdf/docx додаткового матеріалу
+    id (INT) - ідентифікатор матеріалу
+    themes_id (INT) - можу бути пустим (не прив'язаним до будь-якої теми)
+    title (VARCHAR) - назва матеріалу
+    content (VARCHAR) - шлях до pdf/docx додаткового матеріалу
+
+requsts_add_matirials - запити на додавання додаткових матеріалів
+Поля: 
+
+	id	INTEGER NOT NULL,
+	user_id	INTEGER NOT NULL,
+    text TEXT,
+    file VARCHAR(255) NULL, - може бути пустим
 
 session_history - зберігає історію сесій користувачів
 Поля:
 
-id (primary key)
-user_id (foreign key з таблиці users)
-themes_id (INT)
-the_end (bool)
+    id (primary key)
+    user_id (foreign key з таблиці users)
+    themes_id (INT)
+    the_end (bool)
 
 user_materials - зберігає додаткові матеріали, які додають користувачі
 Поля:
 
-id (primary key)
-user_id (foreign key з таблиці users)
-themes_id (INT) - можу бути пустим (не прив'язаним до будь-якої теми)
-material_name (VARCHAR)
-file_link (VARCHAR)
+    id (primary key)
+    user_id (foreign key з таблиці users)
+    themes_id (INT) - можу бути пустим (не прив'язаним до будь-якої теми)
+    material_name (VARCHAR)
+    file_link (VARCHAR)
