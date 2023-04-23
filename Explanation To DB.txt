@@ -84,4 +84,10 @@ user_materials - зберігає додаткові матеріали, які 
     user_id (foreign key з таблиці users)
     themes_id (INT) - можу бути пустим (не прив'язаним до будь-якої теми)
     material_name (VARCHAR)
-    file_link (VARCHAR)
+    file_link (VARCHAR)    file_link (VARCHAR)
+ready_unverified_user_tasks - запам'ятовуває виконанні завдання від користувача
+Поля:
+    
+    id (primary key)
+    all_tasks - індетифікатор задачі
+    user_id - id користувача
