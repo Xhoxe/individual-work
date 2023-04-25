@@ -102,7 +102,7 @@ async def process_callback_query(callback_query: types.CallbackQuery):
     
     conn.close()
     
-    
+
 ######## Блок індивідуальне завдання N3 (Кротко) ########
 
 #меню практичних
@@ -253,6 +253,48 @@ async def process_pr_query_themeRemove(callback_query: types.CallbackQuery):
     
 #кінець блоку видалення ПР
 ############ кінець блоку N3 ###############
+
+######## Блок індивідуальне завдання N4 (Коломицев) Тема: КОМПОНЕНТА ДЛЯ ПЕРЕВІРКИ ТЕСТІВ ########
+
+# Компонента для перевірки тестів
+async def process_test(test_task_id: int, user_id: int):
+    conn = sqlite3.connect('individual-work\FP.db')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM test_tasks WHERE id=?", (test_task_id,))
+    test_task = cur.fetchone()
+    keyboard = types.InlineKeyboardMarkup()
+    for i in range(4):
+        keyboard.add(types.InlineKeyboardButton(text=test_task[i+3], callback_data=f"test_task_answer_{i+1}_{test_task_id}_{user_id}"))
+
+    await bot.send_message(chat_id=user_id, text=f"{test_task[2]}\n\nВаріанти відповідей:", reply_markup=keyboard)
+    conn.close()
+
+# Обробляємо відповідь на тестове завдання
+@dp.callback_query_handler(lambda query: query.data.startswith("test_task_answer_"))
+async def process_test_task_answer(callback_query: types.CallbackQuery):
+    data = callback_query.data.split('_')
+    answer_number = int(data[2])
+    test_task_id = int(data[3])
+    user_id = int(data[4])
+    conn = sqlite3.connect('individual-work\FP.db')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM test_tasks WHERE id=?", (test_task_id,))
+    test_task = cur.fetchone()
+
+    if answer_number == test_task[8]:
+        await bot.send_message(chat_id=user_id, text="Відповідь вірна.")
+        user_points = test_task[9]
+    else:
+        await bot.send_message(chat_id=user_id, text="Відповідь невірна.")
+        user_points = 0
+
+    cur.execute("INSERT INTO test_tasks_results (id, test_task_id, user_id, user_points) VALUES (?, ?, ?, ?)", (None, test_task_id, user_id, user_points))
+    conn.commit()
+    conn.close()
+
+    await bot.send_message(chat_id=user_id, text=f"Ваші бали за це тестове завдання: {user_points}.")
+
+############ кінець блоку N4 ###############
 
 
 if __name__ == '__main__':
