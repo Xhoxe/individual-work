@@ -6,7 +6,6 @@ from aiogram.dispatcher.filters import Text
 import sqlite3
 import os
 
-
 import config #містить токен бота (https://t.me/FP_individual_project_Bot)
 
 
@@ -40,6 +39,7 @@ async def send_welcome(message: types.Message):
         keyboard.add(types.InlineKeyboardButton(text="Керування матеріалом для практичних робіт", callback_data="practical_matirials_manage"))
         keyboard.add(types.InlineKeyboardButton(text="Керування теоретичним навчальним матеріалом", callback_data="theoretical_matirials_manage"))
         await bot.send_message(chat_id=message.chat.id, text="Меню:", reply_markup=keyboard)
+
 
 #спрацбовує лише у випадку якщо користувача немає в БД
 @dp.message_handler()
@@ -313,11 +313,11 @@ async def process_pr_query_add_file(message: Message, state: FSMContext):
     conn.commit()
     conn.close()
     await bot.send_message(chat_id=message.chat.id, text=f"Лекція '{data['theoretical_material_title']}' додана.")
-    
+
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton(text="Повернутись назад до меню", callback_data="theoretical_matirials_manage"))
     await bot.send_message(chat_id=message.chat.id, text=f"Повернутись до меню лекції?", reply_markup=keyboard)
-    
+
     await state.reset_state(with_data=False)
 
 dp.register_message_handler(process_pr_query_add_file, state='waiting_for_theoretical_material_file', content_types=['document'])
@@ -334,11 +334,11 @@ async def process_pr_query_remove(callback_query: types.CallbackQuery):
     cur.execute("SELECT * FROM theoretical_materials")
     pws = cur.fetchall()
     keyboard = types.InlineKeyboardMarkup()
-    
+
     for pw in pws:
-        keyboard.add(types.InlineKeyboardButton(text=pw[2], callback_data=f"theoretical_materials_manage_remove_pr_{pw[0]}"))   
-         
-    await bot.send_message(chat_id=callback_query.message.chat.id, text="Оберіть лекцію котру необхідно видалить:", reply_markup=keyboard)    
+        keyboard.add(types.InlineKeyboardButton(text=pw[2], callback_data=f"theoretical_materials_manage_remove_pr_{pw[0]}"))
+
+    await bot.send_message(chat_id=callback_query.message.chat.id, text="Оберіть лекцію котру необхідно видалить:", reply_markup=keyboard)
     conn.close()
 
 @dp.callback_query_handler(lambda callback_query: callback_query.data.startswith("theoretical_materials_manage_remove_pr_"))
@@ -352,31 +352,31 @@ async def process_theoretical_material_removal(callback_query: types.CallbackQue
     await bot.send_message(chat_id=callback_query.message.chat.id, text=f"Лекція з ID {pr_id} видалена.")
     await bot.answer_callback_query(callback_query.id)
 
-# процес видалення лекції (видалення конкретної лекції) 
+# процес видалення лекції (видалення конкретної лекції)
 
 @dp.callback_query_handler(lambda query: query.data.startswith("theoretical_materials_manage_remove_pr_"))
 async def process_pr_query_remove(callback_query: types.CallbackQuery):
     pw_id = callback_query.data.split("theoretical_materials_manage_remove_pr_")[1]
-    
+
     conn = sqlite3.connect('FP.db')
     cur = conn.cursor()
     cur.execute("SELECT * FROM theoretical_materials WHERE id = ?", (pw_id,))
     pws = cur.fetchall()
-    
+
     for pw in pws:
         file_path = pw[3]
         if os.path.exists(file_path):
             os.remove(file_path)
-        
+
     cur.execute("DELETE FROM theoretical_materials WHERE id = ?", (pw_id,))
     conn.commit()
     conn.close()
-    
+
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton(text="Повернутись назад до меню", callback_data="theoretical_materials_manage"))
     await bot.send_message(chat_id=callback_query.message.chat.id, text="Успішно видалено!\n Повернутись до меню лекцій?", reply_markup=keyboard)
 
-# видалення лекцій за темами, виводим кнопки з переліком тем   
+# видалення лекцій за темами, виводим кнопки з переліком тем
 
 @dp.callback_query_handler(text="theoretical_materials_manage_themeRemove")
 async def process_pr_query_themeRemove(callback_query: types.CallbackQuery):
@@ -385,38 +385,83 @@ async def process_pr_query_themeRemove(callback_query: types.CallbackQuery):
     cur.execute("SELECT * FROM themes")
     themes = cur.fetchall()
     keyboard = types.InlineKeyboardMarkup()
-    
+
     for theme in themes:
         keyboard.add(types.InlineKeyboardButton(text=theme[1], callback_data=f"theoretical_materials_manage_themeRemove_theme_{theme[0]}"))
-        
+
     await bot.send_message(chat_id=callback_query.message.chat.id, text="Оберіть тему:", reply_markup=keyboard)
     conn.close()
 
-# отримуємо тему та видаляємо всі практичні з цією темою 
+# отримуємо тему та видаляємо всі практичні з цією темою
 
 @dp.callback_query_handler(lambda query: query.data.startswith("theoretical_materials_manage_themeRemove_theme_"))
 async def process_pr_query_themeRemove(callback_query: types.CallbackQuery):
     theme = callback_query.data.split("theoretical_materials_manage_themeRemove_theme_")[1]
-    
+
     conn = sqlite3.connect('FP.db')
     cur = conn.cursor()
     cur.execute("SELECT * FROM theoretical_materials WHERE theme_id = ?", (theme,))
     pws = cur.fetchall()
-    
+
     for pw in pws:
         try:
             os.remove(pw[3])
         except:
             pass
-        
+
     cur.execute("DELETE FROM theoretical_materials WHERE theme_id = ?", (theme,))
     conn.commit()
     conn.close()
-    
+
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton(text="Повернутись назад до меню", callback_data="theoretical_materials_manage"))
     await bot.send_message(chat_id=callback_query.message.chat.id, text="Успішно видалено!\n Повернутись до меню лекції?", reply_markup=keyboard)
     #кінець блока видалення
    #кінець завдання N1 (Петрук)
+
+
+######## Блок індивідуальне завдання N4 (Коломицев) Тема: КОМПОНЕНТА ДЛЯ ПЕРЕВІРКИ ТЕСТІВ ########
+
+# Компонента для перевірки тестів
+async def process_test(test_task_id: int, user_id: int):
+    conn = sqlite3.connect('individual-work\FP.db')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM test_tasks WHERE id=?", (test_task_id,))
+    test_task = cur.fetchone()
+    keyboard = types.InlineKeyboardMarkup()
+    for i in range(4):
+        keyboard.add(types.InlineKeyboardButton(text=test_task[i+3], callback_data=f"test_task_answer_{i+1}_{test_task_id}_{user_id}"))
+
+    await bot.send_message(chat_id=user_id, text=f"{test_task[2]}\n\nВаріанти відповідей:", reply_markup=keyboard)
+    conn.close()
+
+# Обробляємо відповідь на тестове завдання
+@dp.callback_query_handler(lambda query: query.data.startswith("test_task_answer_"))
+async def process_test_task_answer(callback_query: types.CallbackQuery):
+    data = callback_query.data.split('_')
+    answer_number = int(data[2])
+    test_task_id = int(data[3])
+    user_id = int(data[4])
+    conn = sqlite3.connect('individual-work\FP.db')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM test_tasks WHERE id=?", (test_task_id,))
+    test_task = cur.fetchone()
+
+    if answer_number == test_task[8]:
+        await bot.send_message(chat_id=user_id, text="Відповідь вірна.")
+        user_points = test_task[9]
+    else:
+        await bot.send_message(chat_id=user_id, text="Відповідь невірна.")
+        user_points = 0
+
+    cur.execute("INSERT INTO test_tasks_results (id, test_task_id, user_id, user_points) VALUES (?, ?, ?, ?)", (None, test_task_id, user_id, user_points))
+    conn.commit()
+    conn.close()
+
+    await bot.send_message(chat_id=user_id, text=f"Ваші бали за це тестове завдання: {user_points}.")
+
+############ кінець блоку N4 ###############
+
+
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
